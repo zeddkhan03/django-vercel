@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task List</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'tasks/styles.css' %}">
+    <!-- Add FontAwesome for GitHub Icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body>
+    <div class="background">
+        <div class="glass-card">
+            <h1>Task List</h1>
+
+            <!-- Add GitHub Button -->
+            <div class="github-button-container" style="text-align: right;">
+                <a href="https://github.com/zeddkhan03/django-tasklist" target="_blank" class="github-button">
+                    <i class="fab fa-github"></i> View on GitHub
+                </a>
+            </div>
+
+            <!-- Add Task Form -->
+            <div class="form-container">
+                <h2>Add New Task</h2>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <div class="input-group">
+                            <label for="id_title">Title:</label>
+                            {{ form.title }}
+                        </div>
+                        <div class="input-group">
+                            <label for="id_description">Description:</label>
+                            {{ form.description }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <label for="id_due_date">Due Date:</label>
+                            {{ form.due_date }}
+                        </div>
+                        <div class="input-group">
+                            <label for="id_priority">Priority:</label>
+                            {{ form.priority }}
+                        </div>
+                        <div class="input-group">
+                            <label for="id_status">Status:</label>
+                            {{ form.status }}
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-button">Add Task</button>
+                </form>
+            </div>
+
+            <!-- Sticky Filter and Sort Section -->
+            <div class="filter-sort-container">
+                <form method="get" action="{% url 'task_list' %}">
+                    <div class="filters">
+                        <label for="status">Filter by status:</label>
+                        <select name="status" id="status" onchange="this.form.submit()">
+                            <option value="">All</option>
+                            <option value="To Do" {% if request.GET.status == 'To Do' %}selected{% endif %}>To Do</option>
+                            <option value="In Progress" {% if request.GET.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                            <option value="Done" {% if request.GET.status == 'Done' %}selected{% endif %}>Done</option>
+                        </select>
+                        <label>Sort by:</label>
+                        <select name="sort_by" onchange="this.form.submit()">
+                            <option value="due_date" {% if request.GET.sort_by == 'due_date' %}selected{% endif %}>Due Date</option>
+                            <option value="priority" {% if request.GET.sort_by == 'priority' %}selected{% endif %}>Priority</option>
+                        </select>
+                    </div>
+                </form>
+                
+            </div>
+
+            <!-- Tasks List -->
+            <h2>Incomplete Tasks</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Due Date</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in tasks %}
+                    <tr>
+                        <td>{{ task.title }}</td>
+                        <td>{{ task.description }}</td>
+                        <td>{{ task.due_date }}</td>
+                        <td>{{ task.get_priority_display }}</td>
+                        <td>{{ task.get_status_display }}</td>
+                        <td>
+                            <a href="{% url 'edit_task' task.id %}" class="edit-button">Edit</a>
+                            <a href="{% url 'delete_task' task.id %}" class="delete-button"
+                                onclick="return confirm('Are you sure?');">Delete</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6">No tasks found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Completed Tasks -->
+            <h2>Completed Tasks</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Due Date</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in completed_tasks %}
+                    <tr>
+                        <td>{{ task.title }}</td>
+                        <td>{{ task.description }}</td>
+                        <td>{{ task.due_date }}</td>
+                        <td>{{ task.get_priority_display }}</td>
+                        <td>{{ task.get_status_display }}</td>
+                        <td>
+                            <a href="{% url 'delete_task' task.id %}" class="delete-button"
+                                onclick="return confirm('Are you sure?');">Delete</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6">No completed tasks found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>
